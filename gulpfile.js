@@ -1,0 +1,213 @@
+/**
+ *
+ * putzfish v0.2.0
+ *
+ * $ gulp purge --input <goldfish-export-folder>
+ *
+ */
+
+const {src, dest, series} = require('gulp');
+const cssnano = require('cssnano');
+const postcss = require('gulp-postcss');
+const uglify = require('gulp-uglify');
+const del = require('delete');
+const postUncss = require('uncss').postcssPlugin;
+const pipeline = require('readable-stream').pipeline;
+const rename = require('gulp-rename');
+const replace = require('gulp-replace');
+const imagemin = require('gulp-imagemin');
+
+/**
+ * Defaults
+ * ----------------------------------------------------------
+ */
+
+let input = '';
+let output = '';
+
+/**
+ * Command Line Inputs
+ *
+ * $ gulp purge --input <goldfish-export-folder>
+ *
+ * ----------------------------------------------------------
+ */
+
+// fetch command line arguments
+const arg = (argList => {
+  let arg = {},
+    a,
+    opt,
+    thisOpt,
+    curOpt;
+  for (a = 0; a < argList.length; a++) {
+    thisOpt = argList[a].trim();
+    opt = thisOpt.replace(/^\-+/, '');
+
+    if (opt === thisOpt) {
+      // argument value
+      if (curOpt) arg[curOpt] = opt;
+      curOpt = null;
+    } else {
+      // argument name
+      curOpt = opt;
+      arg[curOpt] = true;
+    }
+  }
+
+  return arg;
+})(process.argv);
+
+console.log('arg.input: ', arg.input);
+
+
+if (arg.input || arg.input !== undefined) {
+  input = arg.input;
+  output = arg.input + '/../optimiert';
+
+} else {
+  input = './input';
+  output = './optimiert';
+}
+
+
+console.log('INPUT: ', input);
+console.log('OUTPUT: ', output);
+
+/**
+ * Paths
+ * ----------------------------------------------------------
+ */
+
+const paths = {
+
+  html: {
+    src: [output + '/**/*.html'],
+    dest: output + '/'
+  },
+
+  styles: {
+    src: [output + '/support/**/*.css', '!' + output + '/support/**/*.min.css'],
+    dest: output + '/support/'
+  },
+
+  images: {
+    src: [output + '/media/*',],
+    dest: output + '/media'
+  },
+
+  scripts: {
+    src: [output + '/support/**/*.js', '!' + output + '/support/**/*.min.js'],
+    dest: output + '/support/'
+  },
+
+  dest: [output]
+};
+
+/**
+ * Options
+ * ----------------------------------------------------------
+ */
+
+const options = {
+  autoprefixer: {
+    browsers: ['last 2 versions', '> 5%', 'Firefox ESR']
+  },
+  uncss: {
+    html: paths.html.src,
+    timeout: 2000
+  },
+  rename: {
+    suffix: '.min'
+  },
+  imagemin: {
+    verbose: true
+  }
+};
+
+/**
+ * PostCSS Plugins
+ * ----------------------------------------------------------
+ */
+
+const postcss_plugins = [
+  cssnano(),
+  postUncss(options.uncss)
+];
+
+/**
+ * Tasks
+ * ----------------------------------------------------------
+ */
+
+// Clean assets
+function clean() {
+  return del(paths.dest);
+}
+
+// Duplicate Sources
+function copyToOutputFolder() {
+  return pipeline(
+    src(input + '/**/*'),
+    dest(output));
+}
+
+// Styles
+function styles() {
+  // Analyse CSS and compress it
+  return pipeline(
+    src(paths.styles.src),
+    postcss(postcss_plugins),
+    rename(options.rename),
+    dest(paths.styles.dest)
+  );
+}
+
+// Scrips
+function scripts() {
+  // compress JS
+  return pipeline(
+    src(paths.scripts.src),
+    uglify(),
+    rename(options.rename),
+    dest(paths.scripts.dest)
+  );
+}
+
+
+// Images
+function images() {
+  // Minify PNG, JPEG, GIF and SVG images
+  return pipeline(
+    src(paths.images.src),
+    imagemin(options.imagemin),
+    dest(paths.images.dest)
+  );
+}
+
+
+// HTML
+function replaceSupportinHtmlFiles() {
+// replace css and js filenames in html with 'min'-versions
+  return pipeline(
+    src(paths.html.src),
+    replace('.css', '.min.css'),
+    replace('.js', '.min.js'),
+    replace('.min.min.', '.min.'),
+    dest(paths.html.dest)
+  );
+}
+
+/**
+ * Export Tasks
+ * ----------------------------------------------------------
+ */
+
+exports.purge = series(
+  clean,
+  copyToOutputFolder,
+  styles,
+  scripts,
+  replaceSupportinHtmlFiles,
+  images,
+);

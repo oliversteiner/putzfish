@@ -1,0 +1,27 @@
+{
+    "name": "putzfish",
+    "version": "0.2.0",
+    "description": "Cleaning and minifing generated source-files from Goldfish Website Generator",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+        "Goldfish"
+    ],
+    "author": "@oliversteiner",
+    "license": "MIT",
+    "dependencies": {},
+    "devDependencies": {
+        "cssnano": "^4.1.7",
+        "delete": "^1.1.0",
+        "gulp": "^4.0.0",
+        "gulp-imagemin": "^5.0.3",
+        "gulp-postcss": "^8.0.0",
+        "gulp-rename": "^1.4.0",
+        "gulp-replace": "^1.0.0",
+        "gulp-uglify": "^3.0.1",
+        "postcss-uncss": "^0.16.1",
+        "readable-stream": "^3.0.6",
+        "uncss": "^0.16.2"
+    }
+}
