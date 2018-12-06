@@ -167,12 +167,7 @@ function copyToOutputFolder() {
     dest(output));
 }
 
-// import helper File Sources
-function copyHelperFileToOutputFolder() {
-  return pipeline(
-    src('./assets/putzfish.html'),
-    dest(output));
-}
+
 
 // Styles
 function styles() {
@@ -239,7 +234,6 @@ function replaceSupportinHtmlFiles() {
 exports.putzfish = series(
   clean,
   copyToOutputFolder,
-  copyHelperFileToOutputFolder,
   styles,
   uncss,
   scripts,
