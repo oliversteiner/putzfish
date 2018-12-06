@@ -1,6 +1,6 @@
 {
     "name": "putzfish",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "description": "Cleaning and minifing generated source-files from Goldfish Website Generator",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
