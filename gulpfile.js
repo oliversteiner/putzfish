@@ -1,6 +1,6 @@
 /**
  *
- * putzfish v0.4.0
+ * putzfish v0.4.1
  *
  * $ gulp purge --input <goldfish-export-folder>
  *
