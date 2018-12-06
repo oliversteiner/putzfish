@@ -28,7 +28,7 @@ let output = '';
 /**
  * Command Line Inputs
  *
- * $ gulp purge --input <goldfish-export-folder>
+ * $ gulp putzfish --input <goldfish-export-folder>
  *
  * ----------------------------------------------------------
  */
@@ -142,7 +142,7 @@ const postcss_plugins = [
 
 // Clean assets
 function clean() {
-  return del(paths.dest);
+  return del(paths.dest,  {force: true});
 }
 
 // Duplicate Sources
@@ -203,7 +203,7 @@ function replaceSupportinHtmlFiles() {
  * ----------------------------------------------------------
  */
 
-exports.minify = series(
+exports.putzfish = series(
   clean,
   copyToOutputFolder,
   styles,
