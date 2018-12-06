@@ -82,7 +82,7 @@ console.log('OUTPUT: ', output);
 const paths = {
 
   html: {
-    src: [output + '/**/*.html'],
+    src: [output + '/**/*.html', output + '/**/*.php'],
     dest: output + '/'
   },
 
@@ -203,7 +203,7 @@ function replaceSupportinHtmlFiles() {
  * ----------------------------------------------------------
  */
 
-exports.purge = series(
+exports.minify = series(
   clean,
   copyToOutputFolder,
   styles,
