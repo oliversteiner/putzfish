@@ -1,6 +1,6 @@
 /**
  *
- * putzfish v0.2.0
+ * putzfish v0.4.0
  *
  * $ gulp purge --input <goldfish-export-folder>
  *
@@ -87,7 +87,7 @@ const paths = {
   },
 
   styles: {
-    src: [output + '/support/**/*.css', '!' + output + '/support/**/*.min.css'],
+    src: [output + '/support/**/*.css', '!' + output + '/support/**/*.min.css', '!' + output + '/support/global_style.css', '!' + output + '/support/animation.js'],
     dest: output + '/support/'
   },
 
@@ -98,6 +98,11 @@ const paths = {
 
   scripts: {
     src: [output + '/support/**/*.js', '!' + output + '/support/**/*.min.js'],
+    dest: output + '/support/'
+  },
+
+  uncss: {
+    src: [output + '/support/global_style.css'],
     dest: output + '/support/'
   },
 
@@ -115,7 +120,11 @@ const options = {
   },
   uncss: {
     html: paths.html.src,
-    timeout: 2000
+    timeout: 500,
+
+    // zoomOverlay7aa6a9135d596740
+    ignore       : ['#overlay', '.image','#imageZoomContainer', /zoomOverlay[\w]+/],
+
   },
   rename: {
     suffix: '.min'
@@ -130,15 +139,21 @@ const options = {
  * ----------------------------------------------------------
  */
 
-const postcss_plugins = [
-  cssnano(),
-  postUncss(options.uncss)
+const postcss_plugins_uncss = [
+  postUncss(options.uncss),
+  cssnano()
+];
+
+const postcss_plugins_nano = [
+  cssnano()
 ];
 
 /**
  * Tasks
  * ----------------------------------------------------------
  */
+
+
 
 // Clean assets
 function clean() {
@@ -152,14 +167,32 @@ function copyToOutputFolder() {
     dest(output));
 }
 
+// import helper File Sources
+function copyHelperFileToOutputFolder() {
+  return pipeline(
+    src('./assets/putzfish.html'),
+    dest(output));
+}
+
 // Styles
 function styles() {
   // Analyse CSS and compress it
   return pipeline(
     src(paths.styles.src),
-    postcss(postcss_plugins),
+    postcss(postcss_plugins_nano),
     rename(options.rename),
     dest(paths.styles.dest)
+  );
+}
+
+// Uncss global_styles
+function uncss() {
+  // Analyse CSS and compress it
+  return pipeline(
+    src(paths.uncss.src),
+    postcss(postcss_plugins_uncss),
+    rename(options.rename),
+    dest(paths.uncss.dest)
   );
 }
 
@@ -206,7 +239,9 @@ function replaceSupportinHtmlFiles() {
 exports.putzfish = series(
   clean,
   copyToOutputFolder,
+  copyHelperFileToOutputFolder,
   styles,
+  uncss,
   scripts,
   replaceSupportinHtmlFiles,
   images,
